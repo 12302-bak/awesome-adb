@@ -633,6 +633,12 @@ adb uninstall com.qihoo360.mobilesafe
 
 表示卸载 360 手机卫士。
 
+**卸载内置软件一般没有权限，所以需要使用su 使用
+
+```sh
+pm uninstall --user 0 com.duokan.reader
+```
+
 ### 清除应用数据与缓存
 
 命令：

@@ -22,6 +22,7 @@ Other languages: [:cn: Chinese](./README.md)
 * [Device connection management](#device-connection-management)
     * [Inquiries connected device / simulator](#inquiries-connected-device--simulator)
     * [USB connection](#usb-connection)
+    * [Wireless connection (Android11+)](#wireless-connection-android11)
     * [Wireless connection (need to use the USB cable)](#wireless-connection-need-to-use-the-usb-cable)
     * [Wireless connection (without using the USB cable)](#wireless-connection-without-using-the-usb-cable)
 * [Application Management](#application-management)
@@ -298,6 +299,38 @@ Developer Options 2. Android devices and USB debugging mode is on.
 
    Description Connection successful.
 
+### Wireless connection (Android11+)
+
+[Doc in Android developers](https://developer.android.com/studio/command-line/adb#connect-to-a-device-over-wi-fi-android-11+)
+
+Android 11 and higher support deploying and debugging your app wirelessly from your workstation using Android Debug Bridge (adb). For example, you can deploy your debuggable app to multiple remote devices without physically connecting your device via USB. This eliminates the need to deal with common USB connection issues, such as driver installation.
+
+To use wireless debugging, you need to pair your device to your workstation using a pairing code. Your workstation and device must be connected to the same wireless network. To connect to your device, follow these steps:
+
+1. Update to the latest version of the [SDK Platform-Tools](https://developer.android.com/studio/releases/platform-tools).
+
+2. Connect Android device to run adb computer connected to the same local area network, such as connected to the same WiFi.
+
+3. Enable the **Wireless debugging** option.
+
+4. On the dialog that asks **Allow wireless debugging on this network?**, click **Allow**.
+
+5. Select **Pair device with pairing code**. Take note of the pairing code, IP address, and port number displayed on the device.
+
+6. On your workstation, open a terminal and navigate to `android_sdk/platform-tools`.
+
+7. Run `adb pair ipaddr:port`. Use the IP address and port number from step 5.
+
+8. When prompted, enter the pairing code that you received in step 5. A message indicates that your device has been successfully paired.
+
+  ```sh
+  none
+  Enter pairing code: xxxxxx
+  Successfully paired to ...
+  ```
+
+9. (For Linux or Microsoft Windows only) Run `adb connect ipaddr:port`. Use the IP address and port under **Wireless debugging**.
+
 ### Wireless connection (need to use the USB cable)
 
 In addition to the USB connection to the computer to use adb, can also be a wireless connection - although the connection process is also step using USB needs, but after a successful connection to your device can get rid of the limit of the USB cable within a certain range it !
@@ -497,14 +530,15 @@ parameter:
 
 `Adb install` may be followed by some optional parameters to control the behavior of the installation APK, available parameters and their meanings are as follows:
 
-| Parameter | Meaning                                                                                                   |
-|-----------|-----------------------------------------------------------------------------------------------------------|
-| -l        | Will be applied to protect the installation directory / mnt / asec                                        |
-| -r        | Allowed to cover the installation                                                                         |
-| -t        | Allowed to install application specified in AndroidManifest.xml `android: testOnly =" true "` Application |
-| -s        | Install apps to sdcard                                                                                    |
-| -d        | Downgrade coverage allows installation                                                                    |
-| -g        | Grant all runtime permissions                                                                             |
+| Parameter            | Meaning                                                                                                    |
+|----------------------|------------------------------------------------------------------------------------------------------------|
+| -l                   | Will be applied to protect the installation directory / mnt / asec                                         |
+| -r                   | Allowed to cover the installation                                                                          |
+| -t                   | Allowed to install application specified in AndroidManifest.xml `android: testOnly =" true "` Application  |
+| -s                   | Install apps to sdcard                                                                                     |
+| -d                   | Downgrade coverage allows installation                                                                     |
+| -g                   | Grant all runtime permissions                                                                              |
+| --abi abi-identifier | Force install an apk for a specific ABI, abi-identifier could be armeabi-v7a、arm64-v8a、v86、x86_64, etc. |
 
 After you run the command to see if similar to the following output (status is `Success`) represents the installation was successful:
 
@@ -579,6 +613,7 @@ Common Installation failed output code, the meaning and possible solutions are a
 | INSTALL\_CANCELED\_BY\_USER                                         | applications installed on the device needs confirmation, but not operate the device or the point of cancellation                              | agree to install on the device                                                                 |
 | INSTALL\_FAILED\_ACWF\_INCOMPATIBLE                                 | applications are not compatible with the device                                                                                               |                                                                                                |
 | INSTALL_FAILED_TEST_ONLY                                            | APK file is build via Android Studio 'RUN'                                                                                                    | Rebuild via Gradle assembleDebug or assembleRelease, or Generate Signed APK                    |
+| INSTALL_FAILED_ABORTED: User rejected permissions                   | applications installed on the device has risk tips, needs confimation, but no operate or canceled                                             | agree to install on the device                                                                 |
 | Does not contain AndroidManifest.xml                                | invalid APK file                                                                                                                              |                                                                                                |
 | Is not a valid zip file                                             | invalid APK file                                                                                                                              |                                                                                                |
 | Offline                                                             | device is not connected successfully                                                                                                          | first device with adb successful connection                                                    |
@@ -2124,6 +2159,25 @@ network={
 
 `Ssid` we shall see in the WLAN settings in the name,` psk` the password, `key_mgmt` security encryption.
 
+
+If android version is above O, the path of config file should be in `WifiConfigStore.xml`.
+
+```sh
+adb shell
+su
+cat /data/misc/wifi/WifiConfigStore.xml
+```
+
+Example output:
+
+> because of too many items in the file, it can be focused on `ConfigKey`-- WiFi name and `PreSharedKey` -- WiFi password.
+
+```xml
+<string name="ConfigKey">&quot;Wi-Fi&quot;WPA_PSK</string>
+<string name="PreSharedKey">&quot;931907334&quot;</string>
+```
+
+
 ### To set the system date and time
 
 ** Note: You need root privileges. **
@@ -2469,7 +2523,7 @@ So just delete the emulator and re-download, reinstall, all is well now.
 
 * [aapt](./related/aapt.md)
 * [am](./related/am.md)
-* [dumsys](./related/dumpsys.md)
+* [dumpsys](./related/dumpsys.md)
 * [pm](./related/pm.md)
 * [uiautomator](./related/uiautomator.md)
 
